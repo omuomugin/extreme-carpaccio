@@ -1,46 +1,12 @@
 var FormattedNumber = ReactIntl.FormattedNumber;
 
 var SellerForm = React.createClass({
-	handleSubmit: function(e){
-		e.preventDefault();
-		var name = this.refs.name.getDOMNode().value.trim();
-		var password = this.refs.password.getDOMNode().value.trim();
-		var url = this.refs.url.getDOMNode().value.trim();
-
-		if(!name || !url) {
-			return;
-		}
-
-		this.props.onSellerSubmit({name:name, password:password, url:url});
-
-		this.refs.name.getDOMNode().value= '';
-		this.refs.password.getDOMNode().value= '';
-		this.refs.url.getDOMNode().value= '';
-	},
-
 	render: function(){
 		return (
 			<div className='jumbotron'>
-				<h2>Hello, Seller!</h2>
-
-				<form className='form-inline' onSubmit={this.handleSubmit}>
-					<div className='form-group'>
-						<label htmlFor='name' className='sr-only'>Name</label>
-						<input type='text' placeholder='your name' className='form-control' ref='name'
-                               data-toggle='tooltip' data-placement='bottom' title='Your username'/>
-					</div>
-					<div className='form-group'>
-						<label htmlFor='password' className='sr-only'>Password</label>
-						<input type='password' placeholder='your password' className='form-control' ref='password'
-                               data-toggle='tooltip' data-placement='bottom' title='Password is used if you want to register yourself on a different url. You will need to provide the same username with the same password. Beware that there is nothing that can be done to retrieve it...'/>
-					</div>
-					<div className='form-group'>
-						<label htmlFor='url' className='sr-only'>URL</label>
-                        <input type='text' placeholder='http://192.168.1.1:3000' className='form-control' ref='url'
-                               data-toggle='tooltip' data-placement='bottom' title='Base url of your own client' />
-					</div>
-					<button type='submit' className='btn btn-success'>Register</button>
-				</form>
+				<h2>Extreme Carpaccio - Single Player Mode</h2>
+				<p>Server is running in single-player mode. Client should be running on localhost:9000.</p>
+				<p>Score tracking and graph display are active below.</p>
 			</div>
 		);
 	}
@@ -119,46 +85,28 @@ var SellerView = React.createClass({
 	render: function(){
 		this.refreshChart();
 		var self = this;
-		var sellerNodes = this.props.data.map(function(seller) {
-			var sellerColor = self.string2Color(seller.name);
-			var showOfflineWarning = !seller.online ? <span title="offline" className="glyphicon glyphicon-alert" aria-hidden="true"></span> : '';
-			return (
-				<tr key={seller.name} style={{color: sellerColor}}>
-					<td className="col-md-6"><strong>{seller.name}</strong></td>
-					<td className="col-md-5">
-						<FormattedNumber
-							value={seller.cash}
-							style='currency'
-							currency='EUR' />
-					</td>
-					<td className="col-md-1">
-						{showOfflineWarning}
-					</td>
-				</tr>
-			);
-		});
+		var playerData = this.props.data.length > 0 ? this.props.data[0] : null;
+		var currentScore = playerData ? playerData.cash : 0;
+		var playerStatus = playerData ? (playerData.online ? 'Online' : 'Offline') : 'Disconnected';
+		var statusClass = playerData && playerData.online ? 'text-success' : 'text-danger';
+		
 		return (
 			<div>
 				<div className='row'>
 					<div className='col-md-4'>
-						<h2>Ranking</h2>
-						<div className='table-responsive'>
-							<table className='table table-striped'>
-								<thead>
-								<tr>
-									<th>Name</th>
-									<th>Cash</th>
-									<th></th>
-								</tr>
-								</thead>
-								<tbody>
-								{sellerNodes}
-								</tbody>
-							</table>
+						<h2>Current Score</h2>
+						<div className='well'>
+							<h3>
+								<FormattedNumber
+									value={currentScore}
+									style='currency'
+									currency='EUR' />
+							</h3>
+							<p>Status: <span className={statusClass}><strong>{playerStatus}</strong></span></p>
 						</div>
 					</div>
 					<div className='col-md-8'>
-						<h2>History</h2>
+						<h2>Score History</h2>
 						<canvas id="salesChart" width="730" height="400"></canvas>
 					</div>
 				</div>
@@ -198,23 +146,7 @@ var Seller = React.createClass({
 		});
 	},
 
-	handleSellerSubmit: function(newSeller) {
-		var currentSellers = this.state.data;
-		var sellers = currentSellers.concat([newSeller]);
-
-		$.ajax({
-			url: this.props.url,
-			datatype: 'json',
-			type: 'POST',
-			data: newSeller,
-			success: function(){
-				this.setState({data:sellers});
-			}.bind(this),
-			error: function(xhr, status, err){
-				console.error(this.props.url, status, err.toString());
-			}.bind(this)
-		});
-	},
+	// Seller registration disabled in single-player mode
 
 	getInitialState: function(){
 		return {data: []};
@@ -233,7 +165,7 @@ var Seller = React.createClass({
 	render: function(){
 		return (
 			<div className='container'>
-				<SellerForm onSellerSubmit={this.handleSellerSubmit} />
+				<SellerForm />
 				<SellerView data={this.state.data} salesHistory={this.state.salesHistory} />
 			</div>
 		);
