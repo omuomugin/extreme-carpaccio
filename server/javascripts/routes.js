@@ -5,7 +5,6 @@ module.exports = function (sellerService, dispatcher) {
   var router = express.Router()
   var OK = 200
   var BAD_REQUEST = 400
-  var UNAUTHORIZED = 401
 
   router.get('/sellers', function (request, response) {
     // seller view is returned, to prevent any confidential information leaks
@@ -24,19 +23,9 @@ module.exports = function (sellerService, dispatcher) {
     response.status(OK).send(sellerService.getCashHistory(chunk))
   })
 
+  // Seller registration disabled - using fixed localhost:9000 client
   router.post('/seller', function (request, response) {
-    var sellerName = request.body.name
-    var sellerUrl = request.body.url
-    var sellerPwd = request.body.password
-
-    if (_.isEmpty(sellerName) || _.isEmpty(sellerUrl) || _.isEmpty(sellerPwd)) {
-      response.status(BAD_REQUEST).send({ message: 'missing name, password or url' })
-    } else if (sellerService.isAuthorized(sellerName, sellerPwd)) {
-      sellerService.register(sellerUrl, sellerName, sellerPwd)
-      response.status(OK).end()
-    } else {
-      response.status(UNAUTHORIZED).send({ message: 'invalid name or password' })
-    }
+    response.status(BAD_REQUEST).send({ message: 'Client registration disabled - using fixed localhost:9000 client' })
   })
 
   return router

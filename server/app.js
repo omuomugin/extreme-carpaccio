@@ -16,6 +16,9 @@ var sellerService = new services.SellerService(sellers, configuration);
 var orderService = new services.OrderService(configuration);
 var dispatcher = new services.Dispatcher(sellerService, orderService, configuration);
 
+// Auto-register localhost:9000 client for single-player mode
+sellerService.register('http://localhost:9000', 'Local Player', 'password');
+
 var app = express();
 
 app.use(bodyParser.json());

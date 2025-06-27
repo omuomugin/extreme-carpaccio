@@ -27,7 +27,7 @@ function Server(doLogRequests) {
   });
 
   var server = http.createServer(app);
-  server.start = server.listen.bind(server, process.env.PORT || 3000);
+  server.start = server.listen.bind(server, process.env.PORT || 9000);
   server.stop = server.close.bind(server);
   return server;
 }
