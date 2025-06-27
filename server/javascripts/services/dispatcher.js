@@ -84,6 +84,7 @@ BadRequest.prototype = (function () {
 var SellerCashUpdater = function (_sellerService, _orderService) {
   this.sellerService = _sellerService
   this.orderService = _orderService
+  this.currentOrder = null
 }
 
 SellerCashUpdater.prototype = (function () {
@@ -104,9 +105,11 @@ SellerCashUpdater.prototype = (function () {
             try {
               var actualBill = utils.jsonify(sellerResponse)
               self.orderService.validateBill(actualBill)
-              self.sellerService.updateCash(seller, expectedBill, actualBill, currentIteration)
+              self.sellerService.updateCash(seller, expectedBill, actualBill, currentIteration, self.currentOrder)
             } catch (exception) {
               self.sellerService.notify(seller, { type: 'ERROR', content: exception.message })
+              // Treat missing total field or other validation errors as no_response for history
+              self.sellerService.addRequestHistory(seller.name, self.currentOrder, expectedBill, null, 'no_response')
             }
           })
         } else if (response.statusCode === 404) {
@@ -114,7 +117,7 @@ SellerCashUpdater.prototype = (function () {
           console.info(chalk.grey(seller.name + ' replied 404. Everything is fine.'))
         } else {
           self.sellerService.setOnline(seller)
-          self.sellerService.updateCash(seller, expectedBill, undefined, currentIteration)
+          self.sellerService.updateCash(seller, expectedBill, undefined, currentIteration, self.currentOrder)
         }
       }
     }
@@ -198,6 +201,7 @@ Dispatcher.prototype = (function () {
         if (badRequest) {
           cashUpdater = self.badRequest.updateSellersCash(self, seller, expectedBill, currentIteration)
         } else {
+          self.sellerCashUpdater.currentOrder = order
           cashUpdater = self.sellerCashUpdater.doUpdate(seller, expectedBill, currentIteration)
         }
 

@@ -6,8 +6,10 @@ var chalk = require('chalk')
 var Sellers = function () {
   var sellersMap = {}
   var cashHistory = {}
+  var requestHistory = {}
 
   this.cashHistory = cashHistory
+  this.requestHistory = requestHistory
 
   this.all = function () {
     var sellers = _.map(sellersMap, function (seller) {
@@ -31,6 +33,7 @@ var Sellers = function () {
   function add (seller) {
     sellersMap[seller.name] = seller
     cashHistory[seller.name] = []
+    requestHistory[seller.name] = []
   }
   function update (seller) {
     var previousCash = sellersMap[seller.name].cash
@@ -96,6 +99,35 @@ Sellers.prototype = (function () {
 
     setOnline: function (sellerName) {
       this.get(sellerName).online = true
+    },
+
+    addRequestHistory: function (sellerName, request, expectedResponse, actualResponse, status, timestamp) {
+      var history = this.requestHistory[sellerName]
+      if (!history) {
+        history = this.requestHistory[sellerName] = []
+      }
+      
+      history.push({
+        timestamp: timestamp || new Date().toISOString(),
+        request: request,
+        expectedResponse: expectedResponse,
+        actualResponse: actualResponse,
+        status: status, // 'correct', 'incorrect', 'no_response', 'error'
+        iteration: history.length + 1
+      })
+      
+      // Keep only last 50 requests to prevent memory issues
+      if (history.length > 50) {
+        history.shift()
+      }
+    },
+
+    getRequestHistory: function (sellerName, limit) {
+      var history = this.requestHistory[sellerName] || []
+      if (limit && limit > 0) {
+        return history.slice(-limit).reverse()
+      }
+      return history.slice().reverse()
     }
   }
 })()
