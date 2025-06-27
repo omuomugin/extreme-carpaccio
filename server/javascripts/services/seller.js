@@ -75,7 +75,7 @@ service.allSellers = function () {
   return this.sellers.all()
 }
 
-service.updateCash = function (seller, expectedBill, actualBill, currentIteration) {
+service.updateCash = function (seller, expectedBill, actualBill, currentIteration, originalOrder) {
   if (this.configuration.all().cashFreeze) {
     console.info('Cash was not updated because cashFreeze config parameter is true')
     return
@@ -84,27 +84,36 @@ service.updateCash = function (seller, expectedBill, actualBill, currentIteratio
     var totalExpectedBill = utils.fixPrecision(expectedBill.total, 2)
     var message
     var loss
+    var status
 
     if (_.isEmpty(actualBill)) {
       loss = utils.fixPrecision(totalExpectedBill * 0.5, 2)
       this.deductCash(seller, loss, currentIteration)
       message = 'Goddamn, ' + seller.name + ' has neither sent us a valid bill nor responded 404. ' + loss + ' will be charged.'
       this.notify(seller, { type: 'ERROR', content: message })
+      status = 'no_response'
     } else {
       var totalActualBill = utils.fixPrecision(actualBill.total, 2)
 
       if (actualBill && totalExpectedBill === totalActualBill) {
         this.addCash(seller, totalExpectedBill, currentIteration)
         this.notify(seller, { type: 'INFO', content: 'Hey, ' + seller.name + ' earned ' + totalExpectedBill })
+        status = 'correct'
       } else {
         loss = utils.fixPrecision(totalExpectedBill * 0.5, 2)
         this.deductCash(seller, loss, currentIteration)
         message = 'Goddamn, ' + seller.name + ' replied ' + totalActualBill + ' but right answer was ' + totalExpectedBill + '. ' + loss + ' will be charged.'
         this.notify(seller, { type: 'ERROR', content: message })
+        status = 'incorrect'
       }
     }
+
+    // Add to request history
+    this.addRequestHistory(seller.name, originalOrder, expectedBill, actualBill, status)
+    
   } catch (exception) {
     this.notify(seller, { type: 'ERROR', content: exception.message })
+    this.addRequestHistory(seller.name, originalOrder, expectedBill, null, 'error')
   }
 }
 
@@ -129,4 +138,12 @@ service.notify = function (seller, message) {
   } else {
     console.info('Notifying ' + seller.name + ': ' + message.content)
   }
+}
+
+service.addRequestHistory = function (sellerName, request, expectedResponse, actualResponse, status) {
+  this.sellers.addRequestHistory(sellerName, request, expectedResponse, actualResponse, status)
+}
+
+service.getRequestHistory = function (sellerName, limit) {
+  return this.sellers.getRequestHistory(sellerName, limit)
 }

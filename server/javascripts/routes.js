@@ -28,5 +28,13 @@ module.exports = function (sellerService, dispatcher) {
     response.status(BAD_REQUEST).send({ message: 'Client registration disabled - using fixed localhost:9000 client' })
   })
 
+  // Request history endpoint for single-player mode
+  router.get('/history/:sellerName', function (request, response) {
+    var sellerName = request.params.sellerName
+    var limit = parseInt(request.query.limit) || 20
+    var history = sellerService.getRequestHistory(sellerName, limit)
+    response.status(OK).send(history)
+  })
+
   return router
 }
