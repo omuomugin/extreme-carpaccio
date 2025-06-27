@@ -1,53 +1,60 @@
-![build status](https://github.com/dlresende/extreme-carpaccio/actions/workflows/on-prs-made-against-the-server.yml/badge.svg)
-
-# Instructions for Facilitators
-
-French version [here](./README-FR.md).
+# Extreme Carpaccio Server - Single Player Mode
 
 ## Requirements
-- [nodejs](https://nodejs.org/en/)
+- [Node.js](https://nodejs.org/en/)
 
 ## Install & Run
 
-```
+```bash
 npm install
 npm start
 ```
-Start in debug mode (activate debug mode for `xcarpaccio:server`):
 
-```
+The server will start on port 3000 and automatically register a client at localhost:9000.
+
+Start in debug mode:
+```bash
 DEBUG=xcarpaccio:server npm start
 ```
 
-## Test the network
-During the workshop, HTTP packages will be exchanged between participant's computers and the server. Although, many networks block incoming connections using firewalls, which will prevent the server from reaching participants.
+## Single Player Configuration
 
-Before you start an Extreme Carpaccio workshop, it is strongly recommended that you test if the network you will playing with accepts incoming connections. Follow the instructions bellow.
+This server has been modified for single-player local development:
 
-1. Connect a first computer in the network
-1. In that computer run: `$ echo "Hello Extreme Carpaccio" | nc -l 3000`
-1. Connect a second computer in the network
-1. In the second computer run: `$ nc <IP address of the 1st computer> 3000 | tee `
-1. If the network allows incoming connections, you should see the message `Hello Extreme Carpaccio` appearing in the second computer
+- **Auto-registration**: Automatically connects to localhost:9000 client (no manual registration needed)
+- **UI disabled**: Client registration and multi-player ranking features are disabled
+- **Request history**: Added comprehensive request/response tracking for learning
+- **Score tracking**: Individual score and progress monitoring
 
-## Freeze the game to make everyone start at the same time
+## Configuration Options
 
-People will take time to setup their HTTP server. Some of them will need more time than others, because of setup problems.
+Edit `configuration.json` to modify game behavior:
 
-As a facilitator, you may want everyone to be ready before starting the game, to be fair with people that had problems.
+- **`active`**: Enable/disable order sending
+- **`cashFreeze`**: Freeze scoring (useful for testing)
+- **`reduction`**: Pricing strategy ("STANDARD", "HALF PRICE", "PAY THE PRICE")
+- **`offlinePenalty`**: Penalty for unreachable clients
+- **`badRequest`**: Settings for sending corrupted test orders
 
-You can do this this way:
+Changes to this file are automatically reloaded without restarting the server.
 
-1. Open ``configuration.json`` file 
-1. Replace ``"cashFreeze": false,`` with ``"cashFreeze": true,`` and save
-1. Start the game server with ``npm start``
-1. Make everyone register
-1. Thanks to the ``cashFreeze`` parameter, everyone's cash stays at 0.
-1. Wait until every team is registered **and marked online**. This means the game is setup for everyone.
-1. Say '*Looks like that everyone is ready. Then I will start the game in 5 seconds.*' 
-1. Open ``configuration.json`` file 
-1. Replace ``"cashFreeze": true,`` with ``"cashFreeze": false,`` and save
-1. Player's cash is now evaluated. The game starts!
+## Dashboard Features
+
+Visit http://localhost:3000 to view:
+- Current score and connection status
+- Score history graph over time
+- Detailed request/response history with:
+  - Order details (prices, quantities, country, reduction)
+  - Expected vs actual responses
+  - Result status (correct/incorrect/no response)
+  - Timestamps for each interaction
+
+## Testing Commands
+
+```bash
+npm test        # Run server tests
+npm run lint    # Check code style
+```
 
 ## Workshop
 Extreme Carpaccio is intended to be played with Product Owners (PO) and Developers together. It can be played with only Developers, but slicing strategies tend to be more biased since developers generally focus more on code and than on product and iterations.

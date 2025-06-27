@@ -1,18 +1,52 @@
-# Extreme Carpaccio
-
-French version [here](./README-FR.md).
+# Extreme Carpaccio - Single Player Mode
 
 Extreme Carpaccio is a coding game designed to encourage and favour incremental development and Continuous Delivery best practices.
 
-During a Extreme Carpaccio session, the facilitator uses his/her computer as a server and sends HTTP requests to participant machines (generally organised in teams). Each request is a purchasing order, like those you have when you buy something somewhere. Participants then calculate the order's total amount and send the correct response back to the server. For every correct response, the participant earns points and increases his/her score. For bad responses, penalties are charged and the participant loses points. Participants should slice (or decouple) the problem in order to deploy small chunks of the solution into production as soon as possible and then score before others. This is the purpose of this exercise: define a slicing strategy, implement, deploy, check feedback, adapt the strategy, implement, deploy... and iterate as fast as possible. **Those who don't slice and try go to production only once the whole solution is implemented risk to spend too much time before scoring, leaving the way free to other teams win.**
+This version has been modified for single-player local development. The server automatically connects to a client running on localhost:9000, eliminating the need for manual registration and multi-player setup.
 
-This workshop, kata, or coding game is intented to help teams to practice concepts like Continuous Delivery, Lean Startup, eXtreme Programming, Agile Development, and more.
+## How it Works
 
-Ready for the challenge? 
+1. **Server** (localhost:3000): Sends HTTP requests with purchase orders to the client
+2. **Client** (localhost:9000): Receives orders, calculates totals, and responds
+3. **Scoring**: Earn points for correct answers, lose points for wrong ones
+4. **Learning**: View request history and track your progress over time
 
-If you are a **participant**, go to [clients/](./clients/README.md) to get more instructions and start playing.
+## Quick Start
 
-If you are a **facilitator**, go to [server/](./server/README.md) and find out how to facilitate a session.
+1. **Start the Server**:
+   ```bash
+   cd server
+   npm install
+   npm start
+   ```
+
+2. **Start the Client**:
+   ```bash
+   cd clients
+   npm install
+   node server.js
+   ```
+
+3. **Open Dashboard**: Visit http://localhost:3000 to view your score and request history
+
+4. **Implement Logic**: Edit `clients/lib/process.js` to calculate order totals correctly
+
+## Game Rules
+
+Calculate the total for each order considering:
+- **Prices** and **quantities** of items
+- **Country-specific tax rates** (e.g., FR=20%, DE=20%, IT=25%)
+- **Volume discounts** applied after tax:
+  - ≥50,000 EUR: 15% discount
+  - ≥10,000 EUR: 10% discount  
+  - ≥7,000 EUR: 7% discount
+  - ≥5,000 EUR: 5% discount
+  - ≥1,000 EUR: 3% discount
+
+**Scoring**:
+- Correct answer: Earn the bill amount
+- Wrong answer: Lose 50% of correct amount
+- No response/invalid format: No penalty
 
 Have fun :D
 
