@@ -2,9 +2,11 @@ var repositories = require('../repositories')
 var _ = require('lodash')
 var utils = require('../utils')
 var chalk = require('chalk')
+var SeededRandom = require('../seeded-random')
 
 function OrderService (configuration) {
   this.countries = new repositories.Countries(configuration)
+  this.rng = new SeededRandom(configuration.all().seed || 1)
 }
 
 module.exports = OrderService
@@ -17,15 +19,15 @@ service.sendOrder = function (seller, order, cashUpdater, logError) {
 }
 
 service.createOrder = function (reduction) {
-  var items = _.random(1, 10)
+  var items = this.rng.randomInt(1, 10)
   var prices = new Array(items)
   var quantities = new Array(items)
-  var country = this.countries.randomOne()
+  var country = this.countries.randomOne(this.rng)
 
   for (var item = 0; item < items; item++) {
-    var price = _.random(1, 100, true)
+    var price = this.rng.randomFloat(1, 100)
     prices[item] = utils.fixPrecision(price, 2)
-    quantities[item] = _.random(1, 10)
+    quantities[item] = this.rng.randomInt(1, 10)
   }
 
   return {

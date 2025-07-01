@@ -3,6 +3,7 @@
   "cashFreeze": false,
   "reduction": "STANDARD",
   "offlinePenalty": 0,
+  "seed": 42,
 
   "badRequest": {
     "active": false,

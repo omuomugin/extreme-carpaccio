@@ -2,9 +2,11 @@ var _ = require('lodash')
 var Reduction = require('./reduction')
 var utils = require('../utils')
 var chalk = require('chalk')
+var SeededRandom = require('../seeded-random')
 
 var BadRequest = function (_configuration) {
   this.configuration = _configuration
+  this.rng = new SeededRandom(_configuration.all().seed || 1)
 }
 
 BadRequest.prototype = (function () {
@@ -18,7 +20,7 @@ BadRequest.prototype = (function () {
     },
 
     corruptOrder: function (order) {
-      var mode = _.sample(getConfiguration(this).modes)
+      var mode = this.rng.sample(getConfiguration(this).modes)
       var copy = _.clone(order)
 
       console.info(chalk.blue('corrupt mode ' + mode))

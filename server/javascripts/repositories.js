@@ -254,7 +254,10 @@ Countries.prototype = (function () {
   return {
     fromEurope: Object.keys(countryMap),
 
-    randomOne: function () {
+    randomOne: function (rng) {
+      if (rng) {
+        return rng.sample(countryDistributionByWeight)
+      }
       return _.sample(countryDistributionByWeight)
     },
 
